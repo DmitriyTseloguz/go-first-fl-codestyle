@@ -41,7 +41,6 @@ var classSkill = map[string]Skill{
 	"healer":  {name: "Защита", points: 40},
 }
 
-// обратите внимание на имена переменных
 func main() {
 	var hero = NewHero()
 
@@ -66,7 +65,6 @@ func main() {
 	)
 
 	hero.class = selectHeroClass()
-	fmt.Println("TEST CLASS", hero.class)
 	hero.skill = classSkill[hero.class]
 
 	fmt.Println(startTraining(hero))
