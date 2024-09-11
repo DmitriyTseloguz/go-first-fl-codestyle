@@ -6,129 +6,189 @@ import (
 	"strings"
 )
 
-func attack(charName, charClass string) string {
-	if charClass == "warrior" {
-		return fmt.Sprintf("%s нанес урон противнику равный %d.", charName, 5+randint(3, 5))
-	}
-
-	if charClass == "mage" {
-		return fmt.Sprintf("%s нанес урон противнику равный %d.", charName, 5+randint(5, 10))
-	}
-
-	if charClass == "healer" {
-		return fmt.Sprintf("%s нанес урон противнику равный %d.", charName, 5+randint(-3, -1))
-	}
-	return "неизвестный класс персонажа"
+var heroClasses = map[string]string{
+	"warrior": "warrior",
+	"mage":    "mage",
+	"healer":  "healer",
 }
 
-// обратите внимание на "if else" и на "else"
-func defence(char_name, char_class string) string {
-	if char_class == "warrior" {
-		return fmt.Sprintf("%s блокировал %d урона.", char_name, 10+randint(5, 10))
-	} else if char_class == "mage" {
-		return fmt.Sprintf("%s блокировал %d урона.", char_name, 10+randint(-2, 2))
-	} else if char_class == "healer" {
-		return fmt.Sprintf("%s блокировал %d урона.", char_name, 10+randint(2, 5))
-	} else {
-		return "неизвестный класс персонажа"
-	}
+var classRandomAttack = map[string][2]int{
+	"warrior": {3, 5},
+	"mage":    {5, 10},
+	"healer":  {-3, -1},
+}
+var classRandomDefence = map[string][2]int{
+	"warrior": {5, 10},
+	"mage":    {-2, 2},
+	"healer":  {2, 5},
 }
 
-// обратите внимание на "if else" и на "else"
-func special(charName, charClass string) string {
-	if charClass == "warrior" {
-		return fmt.Sprintf("%s применил специальное умение `Выносливость %d`", charName, 80+25)
-	} else if charClass == "mage" {
-		return fmt.Sprintf("%s применил специальное умение `Атака %d`", charName, 5+40)
-	} else if charClass == "healer" {
-		return fmt.Sprintf("%s применил специальное умение `Защита %d`", charName, 10+30)
-	} else {
-		return "неизвестный класс персонажа"
-	}
+var selectedClassMessages = map[string]string{
+	"warrior": "Воитель — дерзкий воин ближнего боя. Сильный, выносливый и отважный.",
+	"mage":    "Маг — находчивый воин дальнего боя. Обладает высоким интеллектом.",
+	"healer":  "Лекарь — могущественный заклинатель. Черпает силы из природы, веры и духов.",
 }
 
-// здесь обратите внимание на имена параметров
-func start_training(char_name, char_class string) string {
-	if char_class == "warrior" {
-		fmt.Printf("%s, ты Воитель - отличный боец ближнего боя.\n", char_name)
+var classTrainingLeadMessage = map[string]string{
+	"warrior": "Воитель - отличный боец ближнего боя.",
+	"mage":    "Маг - превосходный укротитель стихий.",
+	"healer":  "Лекарь - чародей, способный исцелять раны.",
+}
+
+var classSkill = map[string]Skill{
+	"warrior": {name: "Выносливость", points: 105},
+	"mage":    {name: "Атака", points: 45},
+	"healer":  {name: "Защита", points: 40},
+}
+
+// обратите внимание на имена переменных
+func main() {
+	var hero = NewHero()
+
+	fmt.Println(
+		"Приветствую тебя, искатель приключений!\n",
+		"Прежде чем начать игру...\n",
+		"...назови себя: ",
+	)
+
+	fmt.Scanf("%s\n", &hero.name)
+
+	fmt.Printf("Здравствуй, %s\n", hero.name)
+
+	fmt.Printf(
+		"Сейчас твоя выносливость — %d, атака — %d и защита — %d.\n",
+		hero.stats.stamina, hero.stats.damage, hero.stats.defense,
+	)
+
+	fmt.Println(
+		"Ты можешь выбрать один из трёх путей силы:\n",
+		"Воитель, Маг, Лекарь",
+	)
+
+	hero.class = selectHeroClass()
+	fmt.Println("TEST CLASS", hero.class)
+	hero.skill = classSkill[hero.class]
+
+	fmt.Println(startTraining(hero))
+}
+
+func selectHeroClass() string {
+	var answer string
+	var selectedClass string
+
+	for answer != "y" {
+		fmt.Print(
+			"Введи название персонажа, за которого хочешь играть: " +
+				"Воитель — warrior, Маг — mage, Лекарь — healer: ",
+		)
+
+		fmt.Scanf("%s\n", &selectedClass)
+
+		var message, isExist = selectedClassMessages[selectedClass]
+
+		if isExist {
+			fmt.Println(message)
+		}
+
+		fmt.Print("Нажми (Y), чтобы подтвердить выбор, или любую другую кнопку, чтобы выбрать другого персонажа: ")
+		fmt.Scanf("%s\n", &answer)
+
+		answer = strings.ToLower(answer)
 	}
 
-	if char_class == "mage" {
-		fmt.Printf("%s, ты Маг - превосходный укротитель стихий.\n", char_name)
-	}
+	return selectedClass
+}
 
-	if char_class == "healer" {
-		fmt.Printf("%s, ты Лекарь - чародей, способный исцелять раны.\n", char_name)
-	}
+func startTraining(hero Hero) string {
+	var randomAttack = classRandomAttack[hero.class]
+	var randomDefence = classRandomDefence[hero.class]
+	var leadTrainingMessage = classTrainingLeadMessage[hero.class]
+
+	fmt.Printf("%s, ты %s.\n", hero.name, leadTrainingMessage)
 
 	fmt.Println("Потренируйся управлять своими навыками.")
-	fmt.Println("Введи одну из команд: attack — чтобы атаковать противника,")
-	fmt.Println("defence — чтобы блокировать атаку противника,")
-	fmt.Println("special — чтобы использовать свою суперсилу.")
+
+	fmt.Println(
+		"Введи одну из команд: " +
+			"attack — чтобы атаковать противника,\n" +
+			"defence — чтобы блокировать атаку противника,\n" +
+			"special — чтобы использовать свою суперсилу.",
+	)
+
 	fmt.Println("Если не хочешь тренироваться, введи команду skip.")
 
-	var cmd string
-	for cmd != "skip" {
+	var command string
+
+	for command != "skip" {
 		fmt.Print("Введи команду: ")
-		fmt.Scanf("%s\n", &cmd)
+		fmt.Scanf("%s\n", &command)
 
-		if cmd == "attack" {
-			fmt.Println(attack(char_name, char_class))
+		var _, isExist = heroClasses[hero.class]
+
+		if !isExist {
+			fmt.Println("неизвестный класс персонажа")
+			continue
 		}
 
-		if cmd == "defence" {
-			fmt.Println(defence(char_name, char_class))
+		if command == "attack" {
+			var damage = hero.attack() + random(randomAttack[0], randomAttack[1])
+
+			fmt.Printf("%s нанес урон противнику равный %d.\n", hero.name, damage)
 		}
 
-		if cmd == "special" {
-			fmt.Println(special(char_name, char_class))
+		if command == "defence" {
+			var blockedDamage = hero.block() + random(randomDefence[0], randomDefence[1])
+
+			fmt.Printf("%s блокировал %d урона.\n", hero.name, blockedDamage)
+		}
+
+		if command == "special" {
+			fmt.Printf(
+				"%s применил специальное умение `%s %d`\n",
+				hero.name, hero.skill.name, hero.skill.points,
+			)
 		}
 	}
 
 	return "тренировка окончена"
 }
 
-// обратите внимание на имя функции и имена переменных
-func choise_char_class() string {
-	var approve_choice string
-	var char_class string
-
-	for approve_choice != "y" {
-		fmt.Print("Введи название персонажа, за которого хочешь играть: Воитель — warrior, Маг — mage, Лекарь — healer: ")
-		fmt.Scanf("%s\n", &char_class)
-		if char_class == "warrior" {
-			fmt.Println("Воитель — дерзкий воин ближнего боя. Сильный, выносливый и отважный.")
-		} else if char_class == "mage" {
-			fmt.Println("Маг — находчивый воин дальнего боя. Обладает высоким интеллектом.")
-		} else if char_class == "healer" {
-			fmt.Println("Лекарь — могущественный заклинатель. Черпает силы из природы, веры и духов.")
-		}
-		fmt.Print("Нажми (Y), чтобы подтвердить выбор, или любую другую кнопку, чтобы выбрать другого персонажа: ")
-		fmt.Scanf("%s\n", &approve_choice)
-		approve_choice = strings.ToLower(approve_choice)
-	}
-	return char_class
-}
-
-// обратите внимание на имена переменных
-func main() {
-	fmt.Println("Приветствую тебя, искатель приключений!")
-	fmt.Println("Прежде чем начать игру...")
-
-	var char_name string
-	fmt.Print("...назови себя: ")
-	fmt.Scanf("%s\n", &char_name)
-
-	fmt.Printf("Здравствуй, %s\n", char_name)
-	fmt.Println("Сейчас твоя выносливость — 80, атака — 5 и защита — 10.")
-	fmt.Println("Ты можешь выбрать один из трёх путей силы:")
-	fmt.Println("Воитель, Маг, Лекарь")
-
-	char_class := choise_char_class()
-
-	fmt.Println(start_training(char_name, char_class))
-}
-
-func randint(min, max int) int {
+func random(min, max int) int {
 	return rand.Intn(max-min) + min
+}
+
+type Hero struct {
+	class string
+	name  string
+	skill Skill
+	stats Stats
+}
+
+func (hero Hero) attack() int {
+	return hero.stats.damage
+}
+
+func (hero Hero) block() int {
+	return hero.stats.defense
+}
+
+func NewHero() Hero {
+	return Hero{
+		stats: Stats{
+			stamina: 80,
+			damage:  5,
+			defense: 10,
+		},
+	}
+}
+
+type Skill struct {
+	name   string
+	points int
+}
+
+type Stats struct {
+	stamina int
+	defense int
+	damage  int
 }
