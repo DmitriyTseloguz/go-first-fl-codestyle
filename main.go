@@ -41,7 +41,6 @@ var classSkill = map[string]Skill{
 	"healer":  {name: "Защита", points: 40},
 }
 
-// обратите внимание на имена переменных
 func main() {
 	var hero = NewHero()
 
